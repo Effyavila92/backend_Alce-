@@ -12,7 +12,7 @@ public class Transaction {
     private Integer value;
     private String  note;
     private Date    date;
-
+    
     public Transaction(String id, String emailOrigin, String emailDestiny, Integer value, String note, Date date){
         this.id             = id;
         this.emailOrigin    = emailOrigin;

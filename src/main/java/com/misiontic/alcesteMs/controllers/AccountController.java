@@ -16,7 +16,7 @@ public class AccountController {
      @GetMapping("/accounts/{email}")
      Account getAccount(@PathVariable String email){
          return accountRepository.findById(email)
-                 .orElseThrow(() -> new AccountNotFoundException("No se encontró ninguna cuenta asociada al usuario enviado"
+                 .orElseThrow(() -> new AccountNotFoundException("No se encontro ninguna cuenta asociada al usuario enviado"
                  ));
      }
 

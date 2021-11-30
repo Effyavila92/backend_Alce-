@@ -1,6 +1,7 @@
 package com.misiontic.alcesteMs.controllers;
 
 import com.misiontic.alcesteMs.exceptions.InsufficientBalanceException;
+import com.misiontic.alcesteMs.exceptions.TransactionNotFoundException;
 import com.misiontic.alcesteMs.models.Transaction;
 import com.misiontic.alcesteMs.repositories.TransactionRepository;
 
@@ -31,11 +32,11 @@ public class TransactionController {
         Account accountDestiny = accountRepository.findById(transaction.getEmailDestiny()).orElse(null);
 
         if(accountOrigin == null){
-            throw new AccountNotFoundException("No se encontró ninguna cuenta asociada al usuario enviado");
+            throw new AccountNotFoundException("No se encontro ninguna cuenta asociada al usuario enviado");
         }
 
         if(accountDestiny == null){
-            throw new AccountNotFoundException("No se encontró ninguna cuenta asociada al usuario enviado");
+            throw new AccountNotFoundException("No se encontro ninguna cuenta asociada al usuario enviado");
         }
 
         if(accountOrigin.getBalance() < transaction.getValue()){
@@ -54,7 +55,7 @@ public class TransactionController {
         return transactionRepository.save(transaction);
     }
 
-    @GetMapping("/transactions/{email]")
+    @GetMapping("/transactions/{email}")
     List<Transaction> userTransaction(@PathVariable String email){
         Account userAccount =
                 accountRepository.findById(email).orElse(null);
@@ -71,5 +72,41 @@ public class TransactionController {
                                                         transactionsDestiny.stream())
                                         .collect(Collectors.toList());
         return transactions;
+    }
+
+    @GetMapping("/transactions/all/{email}")
+    List<Transaction> userAllTransaction(@PathVariable String email){
+        Account userAccount =
+                accountRepository.findById(email).orElse(null);
+        if(userAccount == null){
+            throw new AccountNotFoundException("El usuario enviado no existe en la base de datos");
+        }
+
+        List<Transaction> transactionsOrigin =
+                transactionRepository.findByEmailOrigin(email);
+        List<Transaction> transactionsDestiny =
+                transactionRepository.findByEmailDestiny(email);
+
+        List<Transaction> transactions = transactionRepository.findAll();
+        return transactions;
+    }
+
+    @DeleteMapping("/transactions/delete/{transactionId}")
+    String deleteTransaction(@PathVariable String transactionId){
+        Transaction transaction = transactionRepository.findById(transactionId).orElse(null);
+        if(transaction == null)
+            throw new TransactionNotFoundException("El codigo de la transaccion no existe");
+        transactionRepository.deleteById(transactionId);
+        return "Eliminación completa!";
+    }
+
+    @PutMapping("/transactions/update")
+    Transaction updateTransaction(@RequestBody Transaction transactionUpd){
+        Transaction transaction = transactionRepository.findById(transactionUpd.getId()).orElse(null);
+        if(transaction == null)
+            throw new TransactionNotFoundException("El codigo de la transaccion no existe");
+        transaction.setNote(transactionUpd.getNote());
+        transaction.setDate(new Date());
+        return transactionRepository.save(transaction);
     }
 }
